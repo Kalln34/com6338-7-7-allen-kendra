@@ -30,7 +30,7 @@ var questionsArr = [
 // quiz variables
 var currentQuestionIndex = 0;
 var score = 0;
-var timerId = null;
+var timer = null;
 var timeLeft = 30;
 
 const quizContainer = document.getElementById('quiz');
@@ -59,3 +59,42 @@ function startQuiz() {
   score = 0;
   showQuestion();
 }
+
+// showing the questions
+function showQuestion() {
+  clearInterval(timer);
+  timeLeft = 30;
+
+  quizContainer.innerHTML = '';
+
+  const questionObj = questionsArr[currentQuestionIndex];
+
+  const questionP = document.createElement('p');
+  questionP.textContent = questionObj.question;
+  quizContainer.appendChild(questionP);
+
+  const optionsDiv = document.createElement('div');
+  questionObj.options.forEach(option => {
+    const button = document.createElement('button');
+    button.textContent = option;
+    button.addEventListener('click', () => handleAnswer(option));
+    optionsDiv.appendChild(button);
+  });
+
+  quizContainer.appendChild(optionsDiv);
+
+  const timerP = document.createElement('p');
+  timerP.textContent = timeLeft;
+  quizContainer.appendChild(timerP);
+
+  // timer
+  timer = setInterval(() => {
+    timeLeft--;
+    timerP.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      nextQuestion();
+    }
+  }, 1000);
+}
+
