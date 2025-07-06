@@ -29,21 +29,21 @@ var questionsArr = [
 
 // quiz variables
 var currentQuestionIndex = 0;
-var score = 0;
-var timer = null;
+var correctAnswers = 0;
+var timerId = null;
 var timeLeft = 30;
 
 const quizContainer = document.getElementById('quiz');
 
 // Previous score and start button
-function loadStartScreen() {
+function loadStartScreen(){
   quizContainer.innerHTML = '';
 
-  const previousScore=localStorage.getItem('previous-score');
-  if(previousScore !== null) {
-    const scoreP = document.createElement('p');
-    scoreP.textContent = 'Previous Score: ${previousScore}%';
-    quizDiv.appendChild(scoreP);
+  const previousScore = localStorage.getItem('previous-score');
+  if (previousScore !== null) {
+    const scorePara = document.createElement('p');
+    scorePara.textContent = `Previous Score: ${previousScore}%`;
+    quizContainer.appendChild(scorePara);
   }
 
   const startButton = document.createElement('button');
@@ -56,45 +56,70 @@ function loadStartScreen() {
 // starting quiz game
 function startQuiz() {
   currentQuestionIndex = 0;
-  score = 0;
+  correctAnswers = 0;
   showQuestion();
 }
 
 // showing the questions
 function showQuestion() {
-  clearInterval(timer);
+  clearInterval(timerId);
   timeLeft = 30;
 
   quizContainer.innerHTML = '';
 
   const questionObj = questionsArr[currentQuestionIndex];
 
-  const questionP = document.createElement('p');
-  questionP.textContent = questionObj.question;
-  quizContainer.appendChild(questionP);
+  const questionPara = document.createElement('p');
+  questionPara.textContent = questionObj.question;
+  quizContainer.appendChild(questionPara);
 
   const optionsDiv = document.createElement('div');
   questionObj.options.forEach(option => {
-    const button = document.createElement('button');
-    button.textContent = option;
-    button.addEventListener('click', () => handleAnswer(option));
-    optionsDiv.appendChild(button);
+    const btn = document.createElement('button');
+    btn.textContent = option;
+    btn.addEventListener('click', () => handleAnswer(option));
+    optionsDiv.appendChild(btn);
   });
-
   quizContainer.appendChild(optionsDiv);
 
-  const timerP = document.createElement('p');
-  timerP.textContent = timeLeft;
-  quizContainer.appendChild(timerP);
+  const timerPara = document.createElement('p');
+  timerPara.textContent = timeLeft;
+  quizContainer.appendChild(timerPara);
 
   // timer
-  timer = setInterval(() => {
+  timerId = setInterval(() => {
     timeLeft--;
-    timerP.textContent = timeLeft;
+    timerPara.textContent = timeLeft;
     if (timeLeft <= 0) {
-      clearInterval(timer);
+      clearInterval(timerId);
       nextQuestion();
     }
   }, 1000);
 }
+
+function handleAnswer(selected){
+  clearInterval(timerId);
+  const correctAnswer = questionsArr[currentQuestionIndex].answer;
+  if (selected === correctAnswer) {
+    correctAnswers++;
+  }
+  nextQuestion();
+}
+
+function nextQuestion(){
+  currentQuestionIndex++;
+  if (currentQuestionIndex < questionsArr.length) {
+    showQuestion();
+  } else {
+    endGame();
+  }
+}
+
+function endGame(){
+  const scorePercent = Math.round((correctAnswers / questionsArr.length) * 100);
+  localStorage.setItem('previous-score', scorePercent);
+  loadStartScreen();
+}
+
+loadStartScreen();
 
